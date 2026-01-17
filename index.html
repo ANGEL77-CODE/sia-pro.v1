@@ -779,11 +779,11 @@ function borrarAlu(i) {
 }
         const nombresDias = ["DO", "LU", "MA", "MI", "JU", "VI", "SA"];
 
-   async function validarAcceso() {
+  async function validarAcceso() {
     const passInput = document.getElementById('pass-input').value;
     if (!passInput) return alert("Por favor, ingresa la contraseña.");
 
-    // 1. Intentar buscar en la Nube (Firebase)
+    // 1. Intentar buscar en la Nube (Firebase) si está configurado
     if (window.db_nube) {
         try {
             const docRef = window.doc(window.db_nube, "usuarios", passInput);
@@ -791,34 +791,36 @@ function borrarAlu(i) {
 
             if (docSnap.exists()) {
                 const datosNube = docSnap.data();
-                // Si existe en la nube, descargamos todo al celular
                 db = datosNube.datos;
                 config.pass = passInput;
-                
-                // Guardamos en la memoria del celular para que funcione offline después
                 localStorage.setItem('sia_total_v7', JSON.stringify(db));
                 localStorage.setItem('sia_config_v7', JSON.stringify(config));
                 
                 entrarAlSistema();
-                return; // Salimos de la función con éxito
+                return; 
             }
         } catch (e) {
-            console.log("Error de conexión, intentando modo local...");
+            console.log("Modo local...");
         }
     }
 
-    // 2. Si no hay internet o no existe en la nube, revisa el local (PC original)
+    // 2. Validación Local
     if (passInput === config.pass) {
         entrarAlSistema();
     } else {
-        alert("Contraseña incorrecta o no encontrada en la nube.");
+        alert("Contraseña incorrecta.");
     }
 }
 
 // Función auxiliar para limpiar el código
 function entrarAlSistema() {
-    document.getElementById('login-screen').classList.remove('active');
-    document.getElementById('main-panel').classList.add('active');
+    // Ocultar pantalla de login
+    document.getElementById('login-screen').classList.add('hidden');
+    
+    // Iniciar la barra de carga (Splash Screen)
+    iniciarProgressBar(); 
+    
+    // Actualizar los selectores de datos
     updateGradoSelect();
 }
 
